@@ -1,4 +1,4 @@
 module.exports = {
-    shopping: require("./shopping"),
+    shopping: require("./shopping-api"),
   };
   
