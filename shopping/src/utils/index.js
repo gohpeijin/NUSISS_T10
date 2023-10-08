@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const amqplib = require("amqplib");
 
-const { APP_SECRET, MSG_QUEUE_URL, EXCHANGE_NAME  } = require('../config');
+const { APP_SECRET, MSG_QUEUE_URL, EXCHANGE_NAME, SHOPPING_SERVICE  } = require('../config');
 
 //Utility functions
   (module.exports.ValidateSignature = async (req) => {
@@ -36,3 +36,32 @@ module.exports.CreateChannel = async () => {
       throw err;
     }
   };
+
+
+module.exports.PublishMessage = (channel, service, msg) => {
+  channel.publish(EXCHANGE_NAME, service, Buffer.from(msg));
+  console.log("Sent: ", msg);
+};
+
+module.exports.SubscribeMessage = async (channel, service) => {
+  await channel.assertExchange(EXCHANGE_NAME, "direct", { durable: true });
+  const q = await channel.assertQueue("", { exclusive: true });
+  console.log(` Waiting for messages in queue: ${q.queue}`);
+
+  channel.bindQueue(q.queue, EXCHANGE_NAME, SHOPPING_SERVICE);
+
+  channel.consume(
+    q.queue,
+    (msg) => {
+      if (msg.content) {
+        console.log("the message is:", msg.content.toString());
+        service.SubscribeEvents(msg.content.toString());
+      }
+      console.log("[X] received");
+    },
+    {
+      noAck: true,
+    }
+  );
+};
+
