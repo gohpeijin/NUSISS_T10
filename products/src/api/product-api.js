@@ -12,8 +12,7 @@ module.exports = (app, channel) => {
   const service = new ProductService();
 
   // this will receive call by other service
-  RPCObserver("PRODUCT_RPC", service); // this is the utils/index.js then will call to services to do smtg with data get =D
-
+  RPCObserver("PRODUCT_RPC", service); // serve RPC Request
   // create product (seller)
   app.post(
     "/product/create",
@@ -51,7 +50,7 @@ module.exports = (app, channel) => {
   );
 
   // (customer & seller)
-  app.get("/category/:type", async (req, res, next) => {
+  app.get("/product/category/:type", async (req, res, next) => {
     const type = req.params.type;
 
     try {
@@ -89,14 +88,14 @@ module.exports = (app, channel) => {
   });
 
   // get product by ids (customer & seller)
-  app.get("/ids", async (req, res, next) => {
+  app.get("/product/ids", async (req, res, next) => {
     const { ids } = req.body;
     const products = await service.GetSelectedProducts(ids);
     return res.status(200).json(products);
   });
 
   //get all products (customer & seller)
-  app.get("/", UserAuth, async (req, res, next) => {
+  app.get("/product/", UserAuth, async (req, res, next) => {
     //check validation
     try {
       const { data } = await service.GetProducts();
@@ -116,76 +115,5 @@ module.exports = (app, channel) => {
   });
 };
 
-  // add item to wishlist (customer)
-  app.put("/wishlist", UserAuth, async (req, res, next) => {
-    const { _id } = req.user; // user_id
+ 
 
-    const { data } = await service.GetProductPayload(
-      _id,
-      { productId: req.body._id }, // product_id
-      "ADD_TO_WISHLIST"
-    );
-
-    // PublishCustomerEvent(data);
-    PublishMessage(channel, CUSTOMER_SERVICE, JSON.stringify(data));
-
-    res.status(200).json(data.data.product);
-  });
-
-  app.delete("/wishlist/:id", UserAuth, async (req, res, next) => {
-    const { _id } = req.user;
-    const productId = req.params.id;
-
-    const { data } = await service.GetProductPayload(
-      _id,
-      { productId },
-      "REMOVE_FROM_WISHLIST"
-    );
-    // PublishCustomerEvent(data);
-    PublishMessage(channel, CUSTOMER_SERVICE, JSON.stringify(data));
-
-    res.status(200).json(data.data.product);
-  });
-
-
-  app.put("/cart", UserAuth, async (req, res, next) => {
-    const { _id } = req.user;
-
-    const { data } = await service.GetProductPayload(
-      _id,
-      { productId: req.body._id, qty: req.body.qty },
-      "ADD_TO_CART"
-    );
-
-    // PublishCustomerEvent(data);
-    // PublishShoppingEvent(data);
-
-    PublishMessage(channel, CUSTOMER_SERVICE, JSON.stringify(data));
-    PublishMessage(channel, SHOPPING_SERVICE, JSON.stringify(data));
-
-    const response = { product: data.data.product, unit: data.data.qty };
-
-    res.status(200).json(response);
-  });
-
-  app.delete("/cart/:id", UserAuth, async (req, res, next) => {
-    const { _id } = req.user;
-    const productId = req.params.id;
-
-    const { data } = await service.GetProductPayload(
-      _id,
-      { productId },
-      "REMOVE_FROM_CART"
-    );
-
-    // PublishCustomerEvent(data);
-    // PublishShoppingEvent(data);
-
-    PublishMessage(channel, CUSTOMER_SERVICE, JSON.stringify(data));
-    PublishMessage(channel, SHOPPING_SERVICE, JSON.stringify(data));
-
-    const response = { product: data.data.product, unit: data.data.qty };
-
-    res.status(200).json(response);
-  });
-  

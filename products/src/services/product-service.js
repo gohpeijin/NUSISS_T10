@@ -1,3 +1,5 @@
+/** @format */
+
 const { ProductRepository } = require("../database");
 const { FormateData } = require("../utils");
 
