@@ -9,6 +9,7 @@ const CustomerSchema = new Schema(
     salt: String,
     phone: String,
     address: [{ type: Schema.Types.ObjectId, ref: "address", require: true }],
+    role: String,
   },
   {
     toJSON: {

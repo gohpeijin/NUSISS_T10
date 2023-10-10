@@ -63,7 +63,7 @@ module.exports.PublishMessage = (channel, service, msg) => {
 };
 
 // subscribe mssg
-module.exports.RPCObserver = async (RPC_QUEUE_NAME, fakeResponse) => {
+module.exports.RPCObserver = async (RPC_QUEUE_NAME, service) => {
   const channel = await getChannel();
   await channel.assertQueue(RPC_QUEUE_NAME, {
     durable: false,
@@ -75,9 +75,8 @@ module.exports.RPCObserver = async (RPC_QUEUE_NAME, fakeResponse) => {
       if (msg.content) {
         // DB Operation
         const payload = JSON.parse(msg.content.toString());
-        // ANCHOR: this will call the product-service.js - serveRPCRequest
-        // LINK NUSISS_ARCHSS_T10\products\src\services\product-service.js #product-service-serveRPCRequest
-        const response = await service.serveRPCRequest(payload); // call fake DB operation, do some response with the data
+        // serve RPC Request
+        const response = await service.serveRPCRequest(payload); 
 
         channel.sendToQueue(
           msg.properties.replyTo,

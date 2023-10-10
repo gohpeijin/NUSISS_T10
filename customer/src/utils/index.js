@@ -2,7 +2,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const amqplib = require("amqplib");
 
-const { APP_SECRET, MSG_QUEUE_URL, EXCHANGE_NAME  } = require('../config');
+const {
+  APP_SECRET,
+  EXCHANGE_NAME,
+  CUSTOMER_SERVICE,
+  MSG_QUEUE_URL,
+} = require("../config");
 
 //Utility functions
 (module.exports.GenerateSalt = async () => {
@@ -21,7 +26,7 @@ module.exports.ValidatePassword = async (
 };
 
 (module.exports.GenerateSignature = async (payload) => {
-  return await jwt.sign(payload, APP_SECRET, { expiresIn: '1d' });
+  return await jwt.sign(payload, APP_SECRET, { expiresIn: '90d' });
 }),
   (module.exports.ValidateSignature = async (req) => {
     const signature = req.get('Authorization');
@@ -54,3 +59,30 @@ module.exports.CreateChannel = async () => {
       throw err;
     }
   };
+
+module.exports.PublishMessage = (channel, service, msg) => {
+  channel.publish(EXCHANGE_NAME, service, Buffer.from(msg));
+  console.log("Sent: ", msg);
+};
+
+module.exports.SubscribeMessage = async (channel, service) => {
+  await channel.assertExchange(EXCHANGE_NAME, "direct", { durable: true });
+  const q = await channel.assertQueue("", { exclusive: true });
+  console.log(` Customer Service waiting for messages in queue: ${q.queue}`);
+
+  channel.bindQueue(q.queue, EXCHANGE_NAME, CUSTOMER_SERVICE);
+
+  channel.consume(
+    q.queue,
+    (msg) => {
+      if (msg.content) {
+        console.log("Message is:", msg.content.toString());
+        service.SubscribeEvents(msg.content.toString());
+      }
+      console.log("Empty message received");
+    },
+    {
+      noAck: true,
+    }
+  );
+};
