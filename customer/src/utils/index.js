@@ -2,7 +2,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const amqplib = require("amqplib");
 
-const { APP_SECRET, MSG_QUEUE_URL, EXCHANGE_NAME, CUSTOMER_SERVICE  } = require('../config');
+const {
+  APP_SECRET,
+  EXCHANGE_NAME,
+  CUSTOMER_SERVICE,
+  MSG_QUEUE_URL,
+} = require("../config");
 
 //Utility functions
 (module.exports.GenerateSalt = async () => {
@@ -21,7 +26,7 @@ module.exports.ValidatePassword = async (
 };
 
 (module.exports.GenerateSignature = async (payload) => {
-  return await jwt.sign(payload, APP_SECRET, { expiresIn: '1d' });
+  return await jwt.sign(payload, APP_SECRET, { expiresIn: '90d' });
 }),
   (module.exports.ValidateSignature = async (req) => {
     const signature = req.get('Authorization');

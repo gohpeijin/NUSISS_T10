@@ -28,7 +28,11 @@ class CustomerService {
           email: existingCustomer.email,
           _id: existingCustomer._id,
         });
-        return FormateData({ id: existingCustomer._id, token });
+        return FormateData({
+          id: existingCustomer._id,
+          token,
+          role: existingCustomer.role,
+        });
       }
     }
 
@@ -36,7 +40,7 @@ class CustomerService {
   }
 
   async SignUp(userInputs) {
-    const { email, password, phone } = userInputs;
+    const { email, password, phone, role } = userInputs;
 
     // create salt
     let salt = await GenerateSalt();
@@ -47,6 +51,7 @@ class CustomerService {
       email,
       password: userPassword,
       phone,
+      role,
       salt,
     });
 
@@ -54,7 +59,7 @@ class CustomerService {
       email: email,
       _id: existingCustomer._id,
     });
-    return FormateData({ id: existingCustomer._id, token });
+    return FormateData({ id: existingCustomer._id, token, role });
   }
 
   async AddNewAddress(_id, userInputs) {
@@ -76,75 +81,13 @@ class CustomerService {
     return FormateData(existingCustomer);
   }
 
-  async GetShopingDetails(id) {
-    const existingCustomer = await this.repository.FindCustomerById({ id });
-
-    if (existingCustomer) {
-      // const orders = await this.shopingRepository.Orders(id);
-      return FormateData(existingCustomer);
-    }
-    return FormateData({ msg: "Error" });
-  }
-
-  async GetWishList(customerId) {
-    const wishListItems = await this.repository.Wishlist(customerId);
-    return FormateData(wishListItems);
-  }
-
-  async AddToWishlist(customerId, product) {
-    const wishlistResult = await this.repository.AddWishlistItem(
-      customerId,
-      product
-    );
-    return FormateData(wishlistResult);
-  }
-
-  async ManageCart(customerId, product, qty, isRemove) {
-    const cartResult = await this.repository.AddCartItem(
-      customerId,
-      product,
-      qty,
-      isRemove
-    );
-    return FormateData(cartResult);
-  }
-
-  async ManageOrder(customerId, order) {
-    const orderResult = await this.repository.AddOrderToProfile(
-      customerId,
-      order
-    );
-    return FormateData(orderResult);
-  }
-
-  async SubscribeEvents(payload) {
-    console.log("Triggering.... Customer Events");
-
-    payload = JSON.parse(payload);
-
-    const { event, data } = payload;
-
-    const { userId, product, order, qty } = data;
-
-    switch (event) {
-      case "ADD_TO_WISHLIST":
-        this.AddToWishlist(userId, product);
-        break;
-      case "REMOVE_FROM_WISHLIST":
-        this.AddToWishlist(userId, product);
-        break;
-      case "ADD_TO_CART":
-        this.ManageCart(userId, product, qty, false);
-        break;
-      case "REMOVE_FROM_CART":
-        this.ManageCart(userId, product, qty, true);
-        break;
-      case "CREATE_ORDER":
-        this.ManageOrder(userId, order);
-        break;
-      default:
-        break;
-    }
+  async DeleteProfile(userId) {
+    const data = await this.repository.DeleteCustomerById(userId);
+    const payload = {
+      event: "DELETE_PROFILE",
+      data: { userId },
+    };
+    return { data, payload };
   }
 }
 
