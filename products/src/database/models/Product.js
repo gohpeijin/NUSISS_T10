@@ -6,9 +6,7 @@ const ProductSchema = new Schema({
   // id auto generated no need declare
   user_id: {
     type: Schema.Types.ObjectId,
-    ref: "customer",
     required: [true, "user id required"],
-    index: true,
   },
   name: { type: String, required: [true, "product name required"] },
   description: String,
