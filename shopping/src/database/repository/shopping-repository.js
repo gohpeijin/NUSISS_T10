@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-const { OrderModel, CartModel, WishlistModel } = require("../models");
-const { v4: uuidv4 } = require("uuid");
-const _ = require("lodash");
+const mongoose = require('mongoose');
+const { OrderModel, CartModel, WishlistModel } = require('../models');
+const { v4: uuidv4 } = require('uuid');
+const _ = require('lodash');
 
 //Dealing with data base operations
 class ShoppingRepository {
@@ -63,7 +63,7 @@ class ShoppingRepository {
       // create a new one
       return await WishlistModel.create({
         customerId,
-        wishlist: [{ _id: product_id }],
+        products: [{ _id: product_id }],
       });
     }
   }
@@ -101,7 +101,7 @@ class ShoppingRepository {
           orderId,
           customerId,
           amount,
-          status: "received",
+          status: 'received',
           items: cartItems,
         });
 
@@ -120,6 +120,19 @@ class ShoppingRepository {
     return Promise.all([
       CartModel.findOneAndDelete({ customerId }),
       WishlistModel.findOneAndDelete({ customerId }),
+    ]);
+  }
+
+  async createProfileData(customerId) {
+    return Promise.all([
+      CartModel.create({
+        customerId,
+        items: [],
+      }),
+      WishlistModel.create({
+        customerId,
+        products: [],
+      }),
     ]);
   }
 }

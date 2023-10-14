@@ -1,5 +1,5 @@
-const { ShoppingRepository } = require("../database");
-const { FormateData, RPCRequest } = require("../utils");
+const { ShoppingRepository } = require('../database');
+const { FormateData, RPCRequest } = require('../utils');
 
 // All Business logic will be here
 class ShoppingService {
@@ -10,8 +10,8 @@ class ShoppingService {
   // Cart Info
   async AddCartItem(customerId, product_id, qty) {
     // Grab product info from product Service through RPC
-    const productResponse = await RPCRequest("PRODUCT_RPC", {
-      type: "GET_ONE_PRODUCT",
+    const productResponse = await RPCRequest('PRODUCT_RPC', {
+      type: 'GET_ONE_PRODUCT',
       data: product_id,
     });
     if (productResponse && productResponse._id) {
@@ -23,7 +23,7 @@ class ShoppingService {
       return data;
     }
 
-    throw new Error("Product data not found!");
+    throw new Error('Product data not found!');
   }
 
   async RemoveCartItem(customerId, product_id) {
@@ -58,14 +58,13 @@ class ShoppingService {
     if (Array.isArray(products)) {
       const ids = products.map(({ _id }) => _id);
       // Perform RPC call
-      const productResponse = await RPCRequest("PRODUCT_RPC", {
-        type: "GET_ALL_PRODUCTS",
+      const productResponse = await RPCRequest('PRODUCT_RPC', {
+        type: 'GET_ALL_PRODUCTS',
         data: ids,
       });
       if (productResponse) {
         return productResponse;
       }
-
     }
 
     return {};
@@ -73,11 +72,22 @@ class ShoppingService {
 
   // Orders
   async CreateOrder(customerId, txnNumber) {
-    return this.repository.CreateNewOrder(customerId, txnNumber);
+    const newOrder = await this.repository.CreateNewOrder(
+      customerId,
+      txnNumber
+    );
+
+    return {
+      data: newOrder,
+      payload: {
+        event: 'REDUCE_PRODUCT_QTY',
+        data: { orderArray: newOrder.items },
+      },
+    };
   }
 
   async GetOrder(orderId) {
-    return this.repository.Orders("", orderId);
+    return this.repository.Orders('', orderId);
   }
 
   async GetOrders(customerId) {
@@ -98,18 +108,24 @@ class ShoppingService {
     return this.repository.deleteProfileData(customerId);
   }
 
+  async createProfileData(customerId) {
+    return this.repository.createProfileData(customerId);
+  }
+
   async SubscribeEvents(payload) {
     payload = JSON.parse(payload);
     const { event, data } = payload;
     switch (event) {
-      case "DELETE_PROFILE":
+      case 'DELETE_PROFILE':
         await this.deleteProfileData(data.userId);
+        break;
+      case 'CREATE_PROFILE':
+        await this.createProfileData(data.userId);
         break;
       default:
         break;
     }
   }
-
 }
 
 module.exports = ShoppingService;

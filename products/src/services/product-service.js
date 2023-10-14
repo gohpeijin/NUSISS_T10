@@ -62,6 +62,11 @@ class ProductService {
     return FormateData(products);
   }
 
+  async DeleteProduct(productId) {
+    const data = await this.repository.DeleteProductById(productId);
+    return { data };
+  }
+
   async GetProductPayload(userId, { productId, qty }, event) {
     const product = await this.repository.FindById(productId);
 
@@ -74,6 +79,22 @@ class ProductService {
       return FormateData(payload);
     } else {
       return FormateData({ error: "No product Available" });
+    }
+  }
+
+  async reduceProductQtyFromOrder(orderArray) {
+    return this.repository.reduceProductQtyFromOrder(orderArray);
+  }
+
+  async SubscribeEvents(payload) {
+    payload = JSON.parse(payload);
+    const { event, data } = payload;
+    switch (event) {
+      case 'REDUCE_PRODUCT_QTY':
+        await this.reduceProductQtyFromOrder(data.orderArray);
+        break;
+      default:
+        break;
     }
   }
 

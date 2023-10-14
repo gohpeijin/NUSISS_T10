@@ -1,4 +1,4 @@
-const { ProductModel } = require("../models");
+const { ProductModel } = require('../models');
 
 class ProductRepository {
   async CreateProduct({
@@ -11,19 +11,19 @@ class ProductRepository {
     price,
     active,
   }) {
-    const imageDocuments = imageData.map((image) => {
-      return {
-        data: image.data, // The image buffer
-        contentType: image.contentType, // The MIME type of the image
-      };
-    });
+    // const imageDocuments = imageData.map((image) => {
+    //   return {
+    //     data: image.data, // The image buffer
+    //     contentType: image.contentType, // The MIME type of the image
+    //   };
+    // });
 
     const product = new ProductModel({
-      user_id: "your_user_id", // TODO: manually assign data becuz is empty, You should set this to the actual user_id
+      user_id,
       name,
       description,
       category_type,
-      imageData: imageDocuments, // Assign the array of image documents
+      imageData,
       quantity,
       price,
       active,
@@ -54,10 +54,37 @@ class ProductRepository {
 
   async FindSelectedProducts(selectedIds) {
     const products = await ProductModel.find()
-      .where("_id")
+      .where('_id')
       .in(selectedIds.map((_id) => _id))
       .exec();
     return products;
+  }
+
+  async DeleteProductById(id) {
+    return ProductModel.findByIdAndDelete(id);
+  }
+
+  async reduceProductQtyFromOrder(orderArray) {
+    const productArray = [];
+
+    for (const order of orderArray) {
+      try {
+        const product = await ProductModel.findById(order.product._id); // Assuming order.product is an object containing the product _id
+        if (product) {
+          product.quantity -= order.unit;
+          await product.save();
+          productArray.push(product);
+        } else {
+          // Handle the case where the product is not found
+          console.error(`Product with ID ${order.product._id} not found.`);
+        }
+      } catch (error) {
+        // Handle errors that occur during database operations
+        console.error('Error updating product quantity:', error);
+      }
+    }
+
+    return productArray;
   }
 }
 
