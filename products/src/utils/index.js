@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const amqplib = require("amqplib");
 const { v4: uuid4 } = require("uuid");
 
-const { APP_SECRET, MSG_QUEUE_URL, EXCHANGE_NAME } = require("../config");
+const { APP_SECRET, MSG_QUEUE_URL, EXCHANGE_NAME, PRODUCT_SERVICE } = require("../config");
 
 //Utility functions
 (module.exports.GenerateSalt = async () => {
@@ -60,6 +60,28 @@ module.exports.CreateChannel = async () => {
 module.exports.PublishMessage = (channel, service, msg) => {
   channel.publish(EXCHANGE_NAME, service, Buffer.from(msg));
   console.log("Sent: ", msg);
+};
+
+module.exports.SubscribeMessage = async (channel, service) => {
+  await channel.assertExchange(EXCHANGE_NAME, "direct", { durable: true });
+  const q = await channel.assertQueue("", { exclusive: true });
+  console.log(`Product Service waiting for messages in queue: ${q.queue}`);
+
+  channel.bindQueue(q.queue, EXCHANGE_NAME, PRODUCT_SERVICE);
+
+  channel.consume(
+    q.queue,
+    (msg) => {
+      if (msg.content) {
+        console.log("Message is:", msg.content.toString());
+        service.SubscribeEvents(msg.content.toString());
+      }
+      console.log("Empty message received");
+    },
+    {
+      noAck: true,
+    }
+  );
 };
 
 // subscribe mssg

@@ -62,4 +62,4 @@ services:
       - shopping
       - customer
     ports:
-      - 80:80
+      - 90:80
