@@ -6,13 +6,20 @@ name: Continuous Integration
 on:
   push:
     branches:
-      - main
+      - "*"
   pull_request:
     branches: ["main"]
 
 jobs:
   ci-workflow:
     runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: --name mongodb
 
     strategy:
       matrix:
@@ -24,6 +31,21 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Wait for MongoDB to start
+        run: sleep 15
+
+      - name: Initialize MongoDB Databases and Collections
+        run: |
+          mongo --eval 'use ms_products; db.createCollection("products");'
+
+          mongo --eval 'use ms_shopping; db.createCollection("carts");'
+          mongo --eval 'use ms_shopping; db.createCollection("orders");'
+          mongo --eval 'use ms_shopping; db.createCollection("shoppings");'
+          mongo --eval 'use ms_shopping; db.createCollection("wishlists");'
+
+          mongo --eval 'use ms_customers; db.createCollection("addresses");'
+          mongo --eval 'use ms_customers; db.createCollection("customers");'
 
       - name: Test Customer Service
         working-directory: ./customer
