@@ -86,6 +86,10 @@ class ProductService {
     return this.repository.reduceProductQtyFromOrder(orderArray);
   }
 
+  async ToggleProductActiveState(productId){
+    return this.repository.ToggleProductActiveState(productId);
+  }
+
   async SubscribeEvents(payload) {
     payload = JSON.parse(payload);
     const { event, data } = payload;

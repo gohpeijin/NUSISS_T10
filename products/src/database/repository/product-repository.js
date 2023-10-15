@@ -86,6 +86,24 @@ class ProductRepository {
 
     return productArray;
   }
+
+  async ToggleProductActiveState(productId) {
+    try {
+      const product = await ProductModel.findById(productId); // Assuming order.product is an object containing the product _id
+      if (product) {
+        product.active = !product.active;
+        await product.save();
+        return product;
+      } else {
+        // Handle the case where the product is not found
+        console.error(`Product with ID ${order.product._id} not found.`);
+        return null
+      }
+    } catch (error) {
+      // Handle errors that occur during database operations
+      console.error('Error updating product quantity:', error);
+    }
+  }
 }
 
 module.exports = ProductRepository;

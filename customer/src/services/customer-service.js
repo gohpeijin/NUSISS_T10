@@ -66,10 +66,10 @@ class CustomerService {
 
     return {
       data: { id: newCustomer._id, token, role },
-      payload: {
+      payload: role === "buyer"?{
         event: 'CREATE_PROFILE',
         data: { userId: newCustomer._id },
-      },
+      }: null,
     };
   }
 
