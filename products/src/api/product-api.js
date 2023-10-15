@@ -72,6 +72,17 @@ module.exports = (app, channel) => {
     }
   });
 
+  app.post('/toggleactive/:id', async (req, res, next) => {
+    const productId = req.params.id;
+
+    try {
+      const { data } = await service.ToggleProductActiveState(productId);
+      return res.status(200).json(data);
+    } catch (error) {
+      return res.status(404).json({ error: 'customize error mssg' });
+    }
+  });
+
   app.delete('/:id', async (req, res, next) => {
     const productId = req.params.id;
     const { data } = await service.DeleteProduct(productId);
@@ -101,7 +112,7 @@ module.exports = (app, channel) => {
   });
 
   //get all products (customer & seller)
-  app.get('/', UserAuth, async (req, res, next) => {
+  app.get('/', async (req, res, next) => {
     //check validation
     try {
       const { data } = await service.GetProducts();
