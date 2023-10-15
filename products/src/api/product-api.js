@@ -90,6 +90,15 @@ module.exports = (app, channel) => {
     return res.json(data);
   });
 
+    //Brendan -> Adding patch api endpoint for product
+    app.patch('/:id', async (req, res, next) => {
+      const productId = req.params.id;
+      const reqBody = {...req.body}
+      const {data} = await service.EditProduct(productId, reqBody)
+  
+      return res.json(data)
+    })
+
   // list product per seller
 
   app.get('/user/:userid', UserAuth, async (req, res, next) => {
