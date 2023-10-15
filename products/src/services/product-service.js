@@ -67,6 +67,12 @@ class ProductService {
     return { data };
   }
 
+   //Brendan -> Adding edit product into service
+   async EditProduct (productId, reqBody) {
+    const data = await this.repository.EditProductById(productId, reqBody)
+    return { data };
+  }
+
   async GetProductPayload(userId, { productId, qty }, event) {
     const product = await this.repository.FindById(productId);
 

@@ -64,6 +64,27 @@ class ProductRepository {
     return ProductModel.findByIdAndDelete(id);
   }
 
+  //Brendan -> Adding the update product by /:_id to repository layer
+  async EditProductById(id, reqBody) {
+    try {
+      //Finding the product collection by it's ID
+      const product = await ProductModel.findById(id);
+      if (!product) {
+        throw new Error("Product is not found for given id: " + id);
+      }
+      //Applying the updates from the updatedData Object
+      for (const key in reqBody) {
+        product[key] = reqBody[key];
+      }
+      //Saving the updated product
+      const updatedProduct = await product.save();
+      //Returning the updatedProduct object
+      return updatedProduct;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async reduceProductQtyFromOrder(orderArray) {
     const productArray = [];
 
