@@ -14,13 +14,6 @@ jobs:
   ci-workflow:
     runs-on: ubuntu-latest
 
-    services:
-      mongodb:
-        image: mongo:latest
-        ports:
-          - 27017:27017
-        options: --name mongodb
-
     strategy:
       matrix:
         node-version: [16.x]
@@ -31,6 +24,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Install MongoDB Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mongodb-clients
 
       - name: Wait for MongoDB to start
         run: sleep 15
