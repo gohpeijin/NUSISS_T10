@@ -30,9 +30,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          
+      - name: Install required Node.js packages
+        run: npm install mongodb
 
       - name: Create MongoDB Collections
-        run: node initialise-mongodb.js
+        run: |
+          cd .github
+          node initialise-mongodb.js
 
       - name: Test Customer Service
         working-directory: ./customer
