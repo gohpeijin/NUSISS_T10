@@ -60,6 +60,11 @@ describe("ProductService Tests", () => {
 
     // get the product id and assign it globally
     product_id = searchCreateProductResult.data._id.toString();
+
+    // to make the test fail so it not able to merge in main branch
+    expect(searchCreateProductResult.data.description).toEqual(
+      "not the correct result"
+    );
   });
 
   it("should update a product name and description", async () => {
