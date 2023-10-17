@@ -6,7 +6,7 @@
   "scripts": {
     "start": "NODE_ENV=prod node src/index.js",
     "dev": "NODE_ENV=dev nodemon src/index.js",
-    "test": "jest"
+    "test": "set NODE_ENV=test&& jest"
   },
   "keywords": [],
   "author": "",

@@ -1,5 +1,7 @@
 const ProductService = require("../services/product-service");
 const mongoose = require("mongoose");
+const { DB_URL } = require("../config");
+
 const {
   sampleUpdateProductInputs,
   sampleProductInputs,
@@ -10,7 +12,7 @@ describe("ProductService Tests", () => {
   const productService = new ProductService();
   beforeAll(async () => {
     // Connect to an in-memory MongoDB database or use a test database
-    await mongoose.connect("mongodb://localhost:27017/ms_product", {
+    await mongoose.connect(DB_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
