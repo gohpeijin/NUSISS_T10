@@ -19,7 +19,7 @@ class ProductService {
 
     products.map(({ category_type }) => {
       categories[category_type] = category_type;
-      console.log(category_type);
+      // console.log(category_type);
     });
 
     return FormateData({
@@ -30,7 +30,12 @@ class ProductService {
 
   async GetProductDescription(productId) {
     const product = await this.repository.FindById(productId);
-    return FormateData(product);
+    // return FormateData(product);
+    if (product) {
+      return FormateData(product);
+    } else {
+      return FormateData({ error: "The product is unavialable" });
+    }
   }
 
   async GetProductsByCategory(category) {
@@ -67,9 +72,9 @@ class ProductService {
     return { data };
   }
 
-   //Brendan -> Adding edit product into service
-   async EditProduct (productId, reqBody) {
-    const data = await this.repository.EditProductById(productId, reqBody)
+  //Brendan -> Adding edit product into service
+  async EditProduct(productId, reqBody) {
+    const data = await this.repository.EditProductById(productId, reqBody);
     return { data };
   }
 
@@ -92,7 +97,7 @@ class ProductService {
     return this.repository.reduceProductQtyFromOrder(orderArray);
   }
 
-  async ToggleProductActiveState(productId){
+  async ToggleProductActiveState(productId) {
     return this.repository.ToggleProductActiveState(productId);
   }
 
@@ -100,7 +105,7 @@ class ProductService {
     payload = JSON.parse(payload);
     const { event, data } = payload;
     switch (event) {
-      case 'REDUCE_PRODUCT_QTY':
+      case "REDUCE_PRODUCT_QTY":
         await this.reduceProductQtyFromOrder(data.orderArray);
         break;
       default:
