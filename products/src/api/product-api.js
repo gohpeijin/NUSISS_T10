@@ -134,7 +134,7 @@ module.exports = (app, channel) => {
   app.get('/get/dummy', async (req, res, next) => {
     //check validation
     try {
-      return res.status(200).json('yay deploy success');
+      return res.status(200).json('yay deploy success - mock run');
     } catch (error) {
       return res.status(404).json({ error });
     }
